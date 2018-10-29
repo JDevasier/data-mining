@@ -1,0 +1,35 @@
+CSE4334/5334 Data Mining
+Fall 2018
+Programming Assignment 1 (P1) grading rubrics:
+
+(1) Correctness (50 points)
+We will evaluate your code by calling the following functions. Please refer to the assignment for detialed explanantion of their requied input and output. 
+
+* getidf(token)
+* getqvec(qstring)
+* query(qstring)
+
+We will use a script to automatically grade your code. So, make sure to use the same function names, parameter names/types/orders as specified above. 
+
+There will be 50 test cases, of which each is worth 1 point. Make sure your program will behave correctly under boundary cases and incorrect input. 
+
+(2) Efficiency (30 points)
+We will run the codes of all students to get a median speed as reference. We will assign more points to faster programs. 
+
+1st tier (a finger snap): 30 points.
+2nd iter (a few seconds): 20 points.
+3rd tier (take a while) or your program cannot successfully execute without TA's tuning: 10 points.
+Extremely slow or not doing anything meaningful: 0 points. 
+
+(3) Quality--clarity, organization, modularity, comments (20 points)
+Follow good coding standards to make your program easy to understand by others and easy to maintain/extend. DO NOT provide documents in PDF/Word files. Instead, provide sufficient comments in your code and make it self-explaining. 
+
+High mark  : 20 points
+Medium mark : 12 points
+Low mark : 6 points
+Very poor: 0 points
+
+(4) Total score (100 points)
+
+Your score will be calculated from the individual break-ups using the following equation:
+(Correctness * .50) + (Efficiency * .30) + (Quality * .20)
