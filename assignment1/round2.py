@@ -56,11 +56,6 @@ def count_words(paragraph):
     return words
 
 
-def gettfidf(term):
-    # normalize([f * getidf(term) for f in gettf(term, counted_paragraphs)])
-    return getidf(term) * math.sqrt(sum([a**2 for a in gettf(term, counted_paragraphs)]))
-
-
 def normalize(l):
     s = sum(l)
     if s == 0:
@@ -69,7 +64,7 @@ def normalize(l):
 
 
 def normalize_dict(d):
-    s = math.sqrt(sum([a**2 for a in d.values()]))
+    s = sum(d.values())
     if s == 0:
         return -1
     return {li: float(float(d[li]) / float(s)) for li in d}
@@ -100,31 +95,30 @@ def getidf(term):
 
 
 def getqvec(qstring):
-    term_vect = get_stems(remove_stopwords(tokenize(qstring.lower())))
-    return normalize_dict({term: getidf(term) for term in term_vect})
+    term_vector = get_stems(remove_stopwords(tokenize(qstring.lower())))
+    return normalize_dict({term: getidf(term) for term in term_vector})
 
 
 def query(qstring):
     global counted_paragraphs
     qvec = getqvec(qstring)
+    q = {term: gettfidf(term, counted_paragraphs) for term in qvec}
     d = counted_paragraphs
 
-    best_p = ("", 0)
+    best_p = ("", -1)
     for p in d:
-        score = cos_sim(qvec, p)
-        if score > best_p[1]:
-            best_p = (p, score)
+        # print(p)
+        print(cos_sim(qvec, p))
 
     return best_p
 
 
 def cos_sim(query, paragraph):
     cosim = 0
+    print(query, paragraph)
     for term in query:
         if term in paragraph:
             cosim += query[term]
-    #cosim /= sum([a**2 for a in paragraph.values()])
-    #cosim /= sum([a**2 for a in query.values()])
     return cosim
 
 
@@ -134,6 +128,8 @@ counted_paragraphs = []
 def main():
     # Read the document
     doc = read_file("debate.txt")
+    # Get bag of words
+    words = get_stems(remove_stopwords(tokenize(str(doc).lower())))
     # Split each paragraph
     paragraphs = get_paragraphs(doc)
     # Lowercase all paragraphs
@@ -145,12 +141,14 @@ def main():
     # Stem each paragraph
     tokens = [get_stems(p) for p in tokens]
 
+    paragraph_vectors = [{word: p.count(word)
+                          for word in words} for p in tokens]
+
     # Count number of occurences for each word in each paragraph
     global counted_paragraphs
     counted_paragraphs = [count_words(p) for p in tokens]
 
-    print("%s%.4f" % query(
-        "The alternative, as cruz has proposed, is to deport 11 million people from this country"))
+    print(getqvec("vector entropy"))
 
 
 main()
