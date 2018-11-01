@@ -56,81 +56,57 @@ def count_words(paragraph):
     return words
 
 
-def normalize(l):
-    s = sum(l)
-    if s == 0:
-        return -1
-    return [float(float(li) / float(s)) for li in l]
-
-
-def normalize_dict(d):
-    s = sum(d.values())
-    if s == 0:
-        return -1
-    return {li: float(float(d[li]) / float(s)) for li in d}
-
-
-def gettf(term, counted_paragraphs):
-    tf_vector = []
-    for p in counted_paragraphs:
-        if term in p:
-            tf_vector.append(math.log10(1 + p[term]))
-        else:
-            tf_vector.append(0)
-    return tf_vector
-
-
 def getidf(term):
-    global counted_paragraphs
-    N = len(counted_paragraphs)
+    global paragraph_vectors
+    N = len(paragraph_vectors)
     dft = 0
-    for p in counted_paragraphs:
+    for p in paragraph_vectors:
         if term in p:
-            dft += 1
+            dft += p[term]
 
     if dft == 0:
         return -1
 
     return math.log10(N / dft)
 
+def gettf(term, paragraph_vector):
+    if paragraph_vector[term] == 0:
+        return 0
+    return math.log10(paragraph_vector[term])
+
+def gettfidf(term, paragraph_vector):
+    return (1 + gettf(term, paragraph_vector)) * getidf(term)
 
 def getqvec(qstring):
-    term_vector = get_stems(remove_stopwords(tokenize(qstring.lower())))
-    return normalize_dict({term: getidf(term) for term in term_vector})
+    term_vect = get_stems(remove_stopwords(tokenize(qstring.lower())))
+    return normalize_dict({term: getidf(term) for term in term_vect})
 
-
-def query(qstring):
-    global counted_paragraphs
-    qvec = getqvec(qstring)
-    q = {term: gettfidf(term, counted_paragraphs) for term in qvec}
-    d = counted_paragraphs
-
-    best_p = ("", -1)
-    for p in d:
-        # print(p)
-        print(cos_sim(qvec, p))
-
-    return best_p
-
-
-def cos_sim(query, paragraph):
+def cos_sim(query, paragraph, i):
     cosim = 0
-    print(query, paragraph)
+    global counted_paragraphs
     for term in query:
         if term in paragraph:
-            cosim += query[term]
+            cosim += query[term] * paragraph[term] # * gettf(term, counted_paragraphs)[i]
+    #cosim /= sum([a**2 for a in paragraph.values()])
     return cosim
+
+def get_paragraph_vector(paragraph, bag_of_words):
+    p_vec = {w: 0 for w in bag_of_words}
+    for word in paragraph:
+        p_vec[word] = paragraph[word]
+    return p_vec
 
 
 counted_paragraphs = []
-
+paragraphs = []
+paragraph_vectors = []
 
 def main():
+    global paragraphs, counted_paragraphs, paragraph_vectors
     # Read the document
     doc = read_file("debate.txt")
-    # Get bag of words
-    words = get_stems(remove_stopwords(tokenize(str(doc).lower())))
     # Split each paragraph
+    bag_of_words = [a for a in get_stems(remove_stopwords(tokenize(str(doc).lower())))]    
     paragraphs = get_paragraphs(doc)
     # Lowercase all paragraphs
     paragraphs = [p.lower() for p in paragraphs]
@@ -140,15 +116,15 @@ def main():
     tokens = [remove_stopwords(p) for p in tokens]
     # Stem each paragraph
     tokens = [get_stems(p) for p in tokens]
-
-    paragraph_vectors = [{word: p.count(word)
-                          for word in words} for p in tokens]
-
-    # Count number of occurences for each word in each paragraph
-    global counted_paragraphs
+    # count of each word in paragraph i
     counted_paragraphs = [count_words(p) for p in tokens]
+    # each element is a vector containing all words from the document and their count in paragraph i
+    paragraph_vectors = [get_paragraph_vector(p, bag_of_words) for p in counted_paragraphs]
 
-    print(getqvec("vector entropy"))
+    for term in tokens[0]:
+        tf = gettf(term, paragraph_vectors[0])
+        if tf > 0:
+            print(term, tf, getidf(term))
 
 
 main()
