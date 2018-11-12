@@ -1,0 +1,48 @@
+
+cancer = load_breast_cancer()
+train_feature, test_feature, train_class, test_class = train_test_split(cancer.data, cancer.target, stratify=cancer.target, random_state=0)
+
+# knn = KNeighborsClassifier(n_neighbors=3)
+# knn.fit(train_feature, train_class)
+# print("Test: {}".format(knn.predict(test_feature)))
+# print("Test accuracy: {:.2f}".format(knn.score(test_feature, test_class)))
+
+# training_acc = []
+# test_acc = []
+# n_range = 10
+
+# for n in range(1, n_range+1):
+#     knn = KNeighborsClassifier(n_neighbors=n)
+#     knn.fit(train_feature, train_class)
+
+#     training_acc.append(knn.score(train_feature, train_class))
+#     test_acc.append(knn.score(test_feature, test_class))
+
+# plt.plot(range(1, n_range+1), training_acc, label="training accuracy")
+# plt.plot(range(1, n_range+1), test_acc, label="test accuracy")
+# plt.ylabel("acc")
+# plt.xlabel("n")
+# plt.legend()
+# plt.show()
+
+# linearsvm = LinearSVC(random_state=0)
+# linearsvm.fit(train_feature, train_class)
+# print("SVM Score: {:0.3f}".format(linearsvm.score(test_feature, test_class)))
+
+nb = GaussianNB().fit(train_feature, train_class)
+print("NB Score: {:0.3f}".format(nb.score(test_feature, test_class)))
+print(pd.crosstab(test_class, nb.predict(test_feature), rownames=['true'], colnames=['Predicted'], margins=True))
+
+# from sklearn.tree import DecisionTreeClassifier
+# tree = DecisionTreeClassifier(random_state=0, max_depth=4).fit(train_feature, train_class)
+# print("tree score: {:0.3f}".format(tree.score(train_feature, train_class)))
+# print("tree score: {:0.3f}".format(tree.score(test_feature, test_class)))
+
+#export_graphviz(tree, out_file="tree.dot", class_names=["malignant", "benign"], feature_names=cancer.feature_names, impurity=False, filled=True)
+
+from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier(random_state=0, max_depth=4).fit(train_feature, train_class)
+print("tree score: {:0.3f}".format(tree.score(train_feature, train_class)))
+print("tree score: {:0.3f}".format(tree.score(test_feature, test_class)))
+
+print(pd.crosstab(test_class, tree.predict(test_feature), rownames=['true'], colnames=['Predicted'], margins=True))
